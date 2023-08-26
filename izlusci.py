@@ -16,29 +16,31 @@ def izlusci_podatke(blok):
     nogometas = {}
 
     # izluscimo ime in id nogometaša
-    vzorec_ime_in_id_nogometasa = re.compile(r'<a href="/player/(?P<id_nogometasa>\d+)/(?P<ime>.+)">')
+    vzorec_ime_in_id_nogometasa = re.compile(r'<a href="/player/(?P<id_nogometasa>\d+)/(?P<ime>.+)">', flags=re.DOTALL,)
     najdba = vzorec_ime_in_id_nogometasa.search(blok)
     nogometas["id_nogometasa"] = int(najdba["id_nogometasa"])
     nogometas["ime"] = najdba["ime"]
 
     # izluscimo klub in id kluba za katerega igra, na žalost se jih da dobiti le iz slike, zato zgleda tako grdo (podobno bo pri reprezentanci)
     vzorec_klub_in_id_kluba = re.compile(
-        r'<img class="team-img lazy" data-lazy-error="/static/img/lazy-ph/club.png" data-lazy-placeholder="/static/img/lazy-ph/club.png"data-lazy-src="https://cdn.fifacm.com/content/media/imgs/fifa23/teams/52/l(?P<id_kluba>\d+).png?v=10" data-toggle="tooltip" title="(?P<klub>.+)" />'
-    )
+        r'<img class="team-img lazy" data-lazy-error="/static/img/lazy-ph/club.png" data-lazy-placeholder="/static/img/lazy-ph/club.png"data-lazy-src="https://cdn.fifacm.com/content/media/imgs/fifa23/teams/52/l(?P<id_kluba>\d+).png?v=10" data-toggle="tooltip" title="(?P<klub>.+)" />', 
+        flags=re.DOTALL,
+        )
     najdba = vzorec_klub_in_id_kluba.search(blok)
     nogometas["id_kluba"] = int(najdba["id_kluba"])
     nogometas["klub"] = najdba["klub"]
 
     # izluscimo reprezentanco in id reprezentance
     vzorec_reprezentanca_in_id_reprezentance = re.compile(
-        r'<img class="team-img lazy" data-lazy-error="/static/img/lazy-ph/club.png" data-lazy-placeholder="/static/img/lazy-ph/club.png" data-lazy-src="https://cdn.fifacm.com/content/media/imgs/fifa23/nations/(?P<id_reprezentance>\d+).png?v=10" data-toggle="tooltip" title="(?P<reprezentanca>.+)" />'
+        r'<img class="team-img lazy" data-lazy-error="/static/img/lazy-ph/club.png" data-lazy-placeholder="/static/img/lazy-ph/club.png" data-lazy-src="https://cdn.fifacm.com/content/media/imgs/fifa23/nations/(?P<id_reprezentance>\d+).png?v=10" data-toggle="tooltip" title="(?P<reprezentanca>.+)" />', 
+        flags=re.DOTALL,
     )
     najdba = vzorec_reprezentanca_in_id_reprezentance.search(blok)
     nogometas["id_reprezentance"] = int(najdba["id_reprezentance"])
     nogometas["reprezentanca"] = najdba["reprezentanca"]
 
     # izluščimo pozicijo v enajsterici, ki jo ima
-    vzorec_pozicija = re.compile(r'<div class="player-position-cln" > (?P<pozicija>.+) <span class="px-1">')
+    vzorec_pozicija = re.compile(r'<div class="player-position-cln" > (?P<pozicija>.+) <span class="px-1">', flags=re.DOTALL,)
     najdba = vzorec_pozicija.search(blok)
     nogometas["pozicija"] = najdba["pozicija"]
 
@@ -64,18 +66,18 @@ def izlusci_podatke(blok):
     nogometas["starost"] = int(najdba["starost"])
 
     # izluscimo vrednost na trgu in tedensko plačo
-    vzorec_vrednost_in_placa = re.compile(r'<div class="player-value-wage pt-2"> <div> €(?P<vrednost>.+)M</div> <div>€(?P<placa>.+)K</div>')
+    vzorec_vrednost_in_placa = re.compile(r'<div class="player-value-wage pt-2"> <div> €(?P<vrednost>.+)M</div> <div>€(?P<placa>.+)K</div>', flags=re.DOTALL,)
     najdba = vzorec_vrednost_in_placa.search(blok)
     nogometas["vrednost"] = int(najdba["vrednost"])
     nogometas["placa"] = int(najdba["placa"])
 
     # izluščimo višino
-    vzorec_visina = re.compile(r'<div class="player-height"> (?P<visina>.+)cm | (?P<ameriska_visina>.+) </div>')
+    vzorec_visina = re.compile(r'<div class="player-height"> (?P<visina>.+)cm | (?P<ameriska_visina>.+) </div>', flags=re.DOTALL,)
     najdba = vzorec_visina.search(blok)
     nogometas["visina"] = int(najdba["visina"])
 
     # izluščimo težo
-    vzorec_teza = re.compile(r'<div class="player-weight pl-1"> (?P<modeli>.+) ((?P<teza>\d+)kg | (?P<ameriska_teza>\d+)lbs) </div>')
+    vzorec_teza = re.compile(r'<div class="player-weight pl-1"> (?P<modeli>.+) ((?P<teza>\d+)kg | (?P<ameriska_teza>\d+)lbs) </div>', flags=re.DOTALL,)
     najdba = vzorec_teza.search(blok)
     nogometas["teza"] = int(najdba["teza"])
 

@@ -6,7 +6,7 @@ for i in range(1, st_strani + 1):
     odziv = requests.get(url)
     if odziv.status_code == 200:
         print(url)
-        with open(f"stran-{stran}.html", "w") as f:
+        with open(f"stran-{stran}.html", "w", encoding="UTF-8") as f:
             f.write(odziv.text)
     else:
         print("Prišlo je do napake")
