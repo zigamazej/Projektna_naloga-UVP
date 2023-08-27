@@ -3,7 +3,7 @@ import re
 def poisci_bloke(besedilo):
     bloki = []
     vzorec_bloka = re.compile(
-        r'<tr class="player-row">'  r".*?" r"</div>\s+</td>\s+</tr>",
+        r'<tr ><th scope="row" '  r".*?" r"</td></tr>",
         flags=re.DOTALL,
     )
     
@@ -13,80 +13,71 @@ def poisci_bloke(besedilo):
     return bloki
 
 def izlusci_podatke(blok):
-    nogometas = {}
+    igralec = {}
+    
+    vzorec_ime_in_oznaka = re.compile(r'<a href="/players/(?P<oznaka>.+?).html">(?P<ime>.+?)</a>', flags=re.DOTALL,)
+    najdba = vzorec_ime_in_oznaka.search(blok)
+    igralec["ime"] = najdba["ime"]
 
-    # izluscimo ime in id nogometaša
-    vzorec_ime_in_id_nogometasa = re.compile(r'<a href="/player/(?P<id_nogometasa>\d+)/(?P<ime>.+)">', flags=re.DOTALL,)
-    najdba = vzorec_ime_in_id_nogometasa.search(blok)
-    nogometas["id_nogometasa"] = int(najdba["id_nogometasa"])
-    nogometas["ime"] = najdba["ime"]
-
-    # izluscimo klub in id kluba za katerega igra, na žalost se jih da dobiti le iz slike, zato zgleda tako grdo (podobno bo pri reprezentanci)
-    vzorec_klub_in_id_kluba = re.compile(
-        r'<img class="team-img lazy" data-lazy-error="/static/img/lazy-ph/club.png" data-lazy-placeholder="/static/img/lazy-ph/club.png"data-lazy-src="https://cdn.fifacm.com/content/media/imgs/fifa23/teams/52/l(?P<id_kluba>\d+).png?v=10" data-toggle="tooltip" title="(?P<klub>.+)" />', 
-        flags=re.DOTALL,
+    vzorec_kariera = re.compile(
+        r'<td class="right " data-stat="year_min" >(?P<zacetek_kariere>\d+)</td><td class="right " data-stat="year_max" >(?P<konec_kariere>\d+)</td>'
         )
-    najdba = vzorec_klub_in_id_kluba.search(blok)
-    nogometas["id_kluba"] = int(najdba["id_kluba"])
-    nogometas["klub"] = najdba["klub"]
+    najdba = vzorec_kariera.search(blok)
+    igralec["zacetek_kariere"] = int(najdba["zacetek_kariere"])
+    igralec["konec_kariere/sedanjost"] = int(najdba["konec_kariere"])
 
-    # izluscimo reprezentanco in id reprezentance
-    vzorec_reprezentanca_in_id_reprezentance = re.compile(
-        r'<img class="team-img lazy" data-lazy-error="/static/img/lazy-ph/club.png" data-lazy-placeholder="/static/img/lazy-ph/club.png" data-lazy-src="https://cdn.fifacm.com/content/media/imgs/fifa23/nations/(?P<id_reprezentance>\d+).png?v=10" data-toggle="tooltip" title="(?P<reprezentanca>.+)" />', 
-        flags=re.DOTALL,
-    )
-    najdba = vzorec_reprezentanca_in_id_reprezentance.search(blok)
-    nogometas["id_reprezentance"] = int(najdba["id_reprezentance"])
-    nogometas["reprezentanca"] = najdba["reprezentanca"]
-
-    # izluščimo pozicijo v enajsterici, ki jo ima
-    vzorec_pozicija = re.compile(r'<div class="player-position-cln" > (?P<pozicija>.+) <span class="px-1">', flags=re.DOTALL,)
+    vzorec_pozicija = re.compile(r'<td class="center " data-stat="pos" >(?P<pozicija>.+?)</td>', flags=re.DOTALL,)
     najdba = vzorec_pozicija.search(blok)
-    nogometas["pozicija"] = najdba["pozicija"]
+    igralec["pozicija"] = najdba["pozicija"]
 
-    # izluščimo letnici prihoda v klub in konca trenutne pogodbe s tem klubom
-    vzorec_trajanje = re.compile(r'<i class="fad fa-file-signature"></i> (?P<prihod_v_klub>\d+) - (?P<konec_pogodbe>\d+)</span>')
-    najdba = vzorec_trajanje.search(blok)
-    nogometas["prihod_v_klub"] = int(najdba["prihod_v_klub"])
-    nogometas["konec_pogodbe"] = int(najdba["konec_pogodbe"])
-
-    # izluscimo rating na igri fifa23
-    vzorec_rating = re.compile(r'<div class="player-overall rating-search cm23 fifa-green-b "> (?P<rating>\d+) </div>')
-    najdba = vzorec_rating.search(blok)
-    nogometas["rating"] = int(najdba["rating"])
-
-    # izluscimo potencialni rating
-    vzorec_potencial = re.compile(r'<div class="player-potential rating-search cm23 fifa-green-b "> (?P<potencial>\d+) </div>')
-    najdba = vzorec_potencial.search(blok)
-    nogometas["potencial"] = int(najdba["potencial"])
-
-    # izluscimo starost
-    vzorec_starost = re.compile(r'<div class="player-age pt-3"> (?P<starost>\d+) </div>')
-    najdba = vzorec_starost.search(blok)
-    nogometas["starost"] = int(najdba["starost"])
-
-    # izluscimo vrednost na trgu in tedensko plačo
-    vzorec_vrednost_in_placa = re.compile(r'<div class="player-value-wage pt-2"> <div> €(?P<vrednost>.+)M</div> <div>€(?P<placa>.+)K</div>', flags=re.DOTALL,)
-    najdba = vzorec_vrednost_in_placa.search(blok)
-    nogometas["vrednost"] = int(najdba["vrednost"])
-    nogometas["placa"] = int(najdba["placa"])
-
-    # izluščimo višino
-    vzorec_visina = re.compile(r'<div class="player-height"> (?P<visina>.+)cm | (?P<ameriska_visina>.+) </div>', flags=re.DOTALL,)
+    vzorec_visina = re.compile(r'<td class="right " data-stat="height" csk="(?P<csk>.+?)" >(?P<feet>\d+)-(?P<inches>\d+)</td>')
     najdba = vzorec_visina.search(blok)
-    nogometas["visina"] = int(najdba["visina"])
+    igralec["visina"] = round(30.48 * int(najdba["feet"]) + 2.54 * int(najdba["inches"]))
 
-    # izluščimo težo
-    vzorec_teza = re.compile(r'<div class="player-weight pl-1"> (?P<modeli>.+) ((?P<teza>\d+)kg | (?P<ameriska_teza>\d+)lbs) </div>', flags=re.DOTALL,)
+    vzorec_teza = re.compile(r'<td class="right " data-stat="weight" >(?P<teza>\d+)</td>')
     najdba = vzorec_teza.search(blok)
-    nogometas["teza"] = int(najdba["teza"])
+    if najdba:
+        igralec["teza"] = round(0.454 * int(najdba["teza"]))
+    else:
+        igralec["teza"] = None
 
-    return nogometas
+    vzorec_datum_rojstva = re.compile(r'<td class="left " data-stat="birth_date" csk="(?P<datum_rojstva>\d+)" >')
+    najdba = vzorec_datum_rojstva.search(blok)
+    if najdba:
+        igralec["leto_rojstva"] = int(najdba["datum_rojstva"][0:4])
+    else:    
+        igralec["leto_rojstva"] = None
+
+    if "*" in blok:
+        igralec["v_hall_of_fame"] = "da"
+    else:
+        igralec["v_hall_of_fame"] = "ne"
+
+    if "<strong>" in blok:
+        igralec["trenutno_v_ligi"] = "da"
+    else:
+        igralec["trenutno_v_ligi"] = "ne"
+
+#    vzorec_college = re.compile(
+#        #r'<td class="left " data-stat="colleges" >'
+#        r"<a href='/friv/colleges.fcgi?college=(?P<col>.+?)'>",
+#        flags=re.DOTALL,
+#        )
+#    najdba = vzorec_college.search(blok)
+#    if najdba:
+#        igralec["college"] = najdba["college"]
+#    else:
+#        igralec["college"] = None
+
+
+    return igralec
 
 def izlusci_bloke(bloki):
-    podatki_nogometasev = []
+    podatki_igralcev = []
     for blok in bloki:
-        podatki_nogometasev.append(izlusci_podatke(blok))
-    return podatki_nogometasev
+        podatki_igralcev.append(izlusci_podatke(blok))
+    return podatki_igralcev
     
-
+#with open("stran-a.html", encoding="UTF-8") as f:
+#    html = f.read()
+#    print(izlusci_bloke(poisci_bloke(html)))
