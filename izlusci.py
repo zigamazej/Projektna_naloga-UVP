@@ -28,6 +28,8 @@ def izlusci_podatke(blok):
     igralec["zacetek_kariere"] = int(najdba["zacetek_kariere"])
     igralec["konec_kariere/sedanjost"] = int(najdba["konec_kariere"])
 
+    igralec["dolzina_kariere"] = igralec["konec_kariere/sedanjost"] - igralec["zacetek_kariere"] #tam kjer je 0, je igral manj kot eno leto, to so razne 10 dnevne pogodbe in podobno
+
     #izluscimo pozicijo na igriscu, ki je ponavadi igra
     vzorec_pozicija = re.compile(r'<td class="center " data-stat="pos" >(?P<pozicija>.+?)</td>', flags=re.DOTALL,)
     najdba = vzorec_pozicija.search(blok)
@@ -65,6 +67,8 @@ def izlusci_podatke(blok):
         igralec["trenutno_v_ligi"] = "da"
     else:
         igralec["trenutno_v_ligi"] = "ne"
+
+
 
 
 
