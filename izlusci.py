@@ -35,12 +35,12 @@ def izlusci_podatke(blok):
     najdba = vzorec_pozicija.search(blok)
     igralec["pozicija"] = najdba["pozicija"][0]  #nekateri igralci lahko igrajo 2 poziciji, vzamemo le prvo, ki je preferirana
 
-    #izluscimo visino
+    #izluscimo visino in jo pretvorimo v centimetre
     vzorec_visina = re.compile(r'<td class="right " data-stat="height" csk="(?P<csk>.+?)" >(?P<feet>\d+)-(?P<inches>\d+)</td>')
     najdba = vzorec_visina.search(blok)
     igralec["visina"] = round(30.48 * int(najdba["feet"]) + 2.54 * int(najdba["inches"]))
 
-    #izluscimo tezo
+    #izluscimo tezo in jo pretvorimo v kilograme
     vzorec_teza = re.compile(r'<td class="right " data-stat="weight" >(?P<teza>\d+)</td>')
     najdba = vzorec_teza.search(blok)
     if najdba:
@@ -80,6 +80,4 @@ def izlusci_bloke(bloki):
         podatki_igralcev.append(izlusci_podatke(blok))
     return podatki_igralcev
     
-#with open("stran-a.html", encoding="UTF-8") as f:
-#    html = f.read()
-#    print(izlusci_bloke(poisci_bloke(html)))
+
